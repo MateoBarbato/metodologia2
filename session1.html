@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sesión 1 — Diagramas UML (PlantUML)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7f9;
+      --card: #fff;
+      --text: #1a1d23;
+      --muted: #5c6370;
+      --border: #e1e4e8;
+      --code-bg: #f0f1f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --card: #161b22;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --border: #30363d;
+        --code-bg: #21262d;
+      }
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      padding: 1.5rem clamp(1rem, 4vw, 2rem);
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.35rem;
+      font-weight: 650;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem clamp(1rem, 4vw, 2rem) 3rem;
+    }
+    section {
+      margin-bottom: 2.5rem;
+    }
+    section h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .diagram-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    .plantuml-figure {
+      margin: 0 0 1rem;
+      text-align: center;
+    }
+    .plantuml-figure img {
+      max-width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+    .plantuml-figure .err {
+      color: #c0392b;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    pre.plantuml-source {
+      margin: 0;
+      padding: 0.85rem 1rem;
+      background: var(--code-bg);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    pre.plantuml-source code {
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      white-space: pre;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Metodología — Sesión 1</h1>
+    <p>
+      Diagramas en sintaxis <a href="https://plantuml.com/" target="_blank" rel="noopener">PlantUML</a>.
+      El navegador pide el render a <a href="https://kroki.io/" target="_blank" rel="noopener">Kroki</a> (requiere internet). Editá el código en cada bloque <code>pre.plantuml-source</code> y recargá la página.
+    </p>
+  </header>
+
+  <main>
+    <section aria-labelledby="sec-class">
+      <h2 id="sec-class">Diagrama de clases</h2>
+      <div class="diagram-wrap">
+        <div class="plantuml-figure" data-kroki="plantuml" role="img" aria-label="Diagrama de clases"></div>
+        <pre class="plantuml-source">
+            <code>@startuml
+left to right direction
+
+class Usuario {
+  - id : UUID
+  - email : String
+  + registrarse()
+  + iniciarSesion()
+}
+
+class Pedido {
+  - id : UUID
+  - fecha : Date
+  - estado : EstadoPedido
+  + calcularTotal() : Money
+}
+
+class LineaPedido {
+  - cantidad : int
+  - precioUnitario : Money
+}
+
+Usuario "1" --> "*" Pedido : realiza
+Pedido "1" *-- "*" LineaPedido : contiene
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <section aria-labelledby="sec-seq">
+      <h2 id="sec-seq">Diagrama de secuencia</h2>
+      <div class="diagram-wrap">
+        <div class="plantuml-figure" data-kroki="plantuml" role="img" aria-label="Diagrama de secuencia"></div>
+        <pre class="plantuml-source"><code>@startuml
+actor Usuario
+participant "Web" as W
+participant "API" as API
+participant "Base de datos" as DB
+
+Usuario -> W : Solicita checkout
+W -> API : POST /pedidos
+API -> DB : INSERT pedido
+DB --> API : id pedido
+API --> W : 201 Created
+W --> Usuario : Confirmación
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <section aria-labelledby="sec-state">
+      <h2 id="sec-state">Diagrama de estados</h2>
+      <div class="diagram-wrap">
+        <div class="plantuml-figure" data-kroki="plantuml" role="img" aria-label="Diagrama de estados"></div>
+        <pre class="plantuml-source"><code>@startuml
+[*] --> Borrador
+Borrador --> Enviado : enviar
+Enviado --> EnRevision : recibir
+EnRevision --> Aprobado : aprobar
+EnRevision --> Rechazado : rechazar
+Aprobado --> [*]
+Rechazado --> Borrador : corregir
+@enduml</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Sin conexión o si Kroki no responde, los diagramas no se verán; el texto PlantUML sigue en la página para copiar/pegar en un editor local con PlantUML.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+  <script>
+    (function () {
+      /**
+       * Kroki GET: zlib-compress UTF-8 diagram, then URL-safe base64 (RFC 4648 §5).
+       * @see https://docs.kroki.io/kroki/setup/encode-diagram/
+       */
+      function encodeForKroki(text) {
+        const bytes = new TextEncoder().encode(text);
+        const compressed = pako.deflate(bytes, { level: 9 });
+        let binary = "";
+        for (let i = 0; i < compressed.length; i++) {
+          binary += String.fromCharCode(compressed[i]);
+        }
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+
+      function renderKrokiFigure(figure) {
+        const type = figure.getAttribute("data-kroki") || "plantuml";
+        const pre = figure.parentElement && figure.parentElement.querySelector("pre.plantuml-source code");
+        const source = pre ? pre.textContent : "";
+        const encoded = encodeForKroki(source);
+        const url = "https://kroki.io/" + encodeURIComponent(type) + "/svg/" + encoded;
+
+        const img = document.createElement("img");
+        img.alt = figure.getAttribute("aria-label") || "Diagrama";
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.src = url;
+        img.onerror = function () {
+          figure.innerHTML =
+            '<p class="err">No se pudo cargar el diagrama (revisá la sintaxis PlantUML o la conexión a Kroki).</p>';
+        };
+        figure.appendChild(img);
+      }
+
+      document.querySelectorAll(".plantuml-figure[data-kroki]").forEach(renderKrokiFigure);
+    })();
+  </script>
+</body>
+</html>
