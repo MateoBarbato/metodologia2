@@ -1,0 +1,89 @@
+======================================================================
+SISTEMA DE MOTOS: CASOS DE USO (V1.0)
+======================================================================
+
+[UC-01] NOMBRE: COMPRA EXPRESS 
+----------------------------------------------------------------------
+ACTOR:         Cliente
+DESCRIPCION:   Compra de productos y procesamiento de pago online.
+PRECONDICION:  Articulo con stock > 0 y disponible = true.
+
+FLUJO PRINCIPAL:
+1. Cliente selecciona producto y cantidad.
+2. Cliente completa datos de envio (Email, Direccion, CP).
+3. Cliente selecciona Metodo de Pago (MercadoPago / Transferencia).
+4. EL SISTEMA REDIRIGE A LA Mercado Pago O MUESTRA DATOS DE CBU.
+5. EL CLIENTE EJECUTA EL PAGO EXITOSAMENTE.
+6. El sistema recibe confirmacion (Webhook) y crea el Pedido como "PAGADO".
+7. El sistema descuenta el stock de forma definitiva.
+
+POSTCONDICION: Se genera trackingId y se envia comprobante por email.
+
+QA CHECK (ESCENARIOS DE FALLA):
+- Pago Rechazado: El sistema debe informar al cliente y no descontar stock.
+- Abandono en Pasarela: El pedido debe expirar tras X minutos para liberar
+  el stock reservado.
+- Timeout de Red: El sistema debe validar el estado del pago antes de
+  confirmar la orden al cliente.
+----------------------------------------------------------------------
+
+[CU-02] NOMBRE: SEGUIMIENTO DE PEDIDO
+----------------------------------------------------------------------
+ACTOR:         Cliente
+DESCRIPCION:   Consulta del estado de envio mediante codigo.
+ENTRADAS:      trackingId y Email.
+
+FLUJO PRINCIPAL:
+1. El cliente ingresa el trackingId y su email en la web.
+2. El sistema valida que el email coincida con el registro del pedido.
+3. El sistema devuelve el Estado del Pedido actual.
+
+POSTCONDICION: Visualizacion de linea de tiempo (Enviado/Entregado).
+QA CHECK:      Probar acceso con IDs validos pero emails incorrectos.
+----------------------------------------------------------------------
+
+[CU-03] NOMBRE: GESTION DE INVENTARIO (ABM)
+----------------------------------------------------------------------
+ACTOR:         Administrador
+DESCRIPCION:   Alta, baja o modificacion de productos.
+ENTRADAS:      Interfaz Articulo (Precio, Stock, Categoria).
+
+FLUJO PRINCIPAL:
+1. Admin se autentica en el Backoffice.
+2. Ingresa, modifica o actualiza datos del Articulo.
+3. El sistema valida tipos de datos y guarda en Base de Datos.
+
+POSTCONDICION: El cambio impacta en el catálogo online en tiempo real.
+QA CHECK:      Validar que el campo "precio" no acepte letras ni ceros.
+----------------------------------------------------------------------
+
+[CU-04] NOMBRE: ACTUALIZACION DE LOGISTICA
+----------------------------------------------------------------------
+ACTOR:         Administrador / Sistema (Webhook)
+DESCRIPCION:   Cambio de estado del envio (tercerizado).
+PRECONDICION:  El pedido debe estar en estado "PAGADO".
+
+FLUJO PRINCIPAL:
+1. Se recibe aviso de la empresa de logistica.
+2. El sistema actualiza Estado del Pedido a "ENVIADO" o "ENTREGADO".
+3. Se dispara notificacion automatica al email del cliente.
+
+POSTCONDICION: El cliente recibe el aviso de cambio de estado.
+QA CHECK:      Verificar que un pedido "CANCELADO" no pueda ser "ENVIADO".
+----------------------------------------------------------------------
+
+[CU-05] NOMBRE: CONCILIACION DE PAGOS
+----------------------------------------------------------------------
+ACTOR:         Administrador
+DESCRIPCION:   Confirmacion del ingreso del dinero.
+ENTRADAS:      ID de Transaccion o Comprobante de Transferencia.
+
+FLUJO PRINCIPAL:
+1. Se confirma el pago.
+2. El sistema cambia el pedido de "PENDIENTE" a "PAGADO".
+3. El stock se descuenta de forma definitiva.
+
+POSTCONDICION: El pedido queda habilitado para el proceso de logistica.
+QA CHECK:      Validar que no se duplique el stock descontado si el pago
+               se procesa dos veces por error de red.
+----------------------------------------------------------------------

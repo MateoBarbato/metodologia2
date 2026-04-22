@@ -4,12 +4,12 @@ enum Categoria {
 	REPUESTOS,
 }
 enum EstadoPedido {
-	PENDIENTE,
-	ENVIADO,
-	ENTREGADO,
-	CANCELADO,
+ 'PENDIENTE',
+    'PAGADO',
+    'ENVIADO',
+    'ENTREGADO',
+    'CANCELADO',
 }
-
 interface Usuario {
 	id: string;
 	email: string;
@@ -35,13 +35,16 @@ interface Articulo {
 	fechaCreacion: Date;
 }
 
+
 interface Pedido {
-	id: string;
-	fecha: Date;
-	estado: EstadoPedido;
-	usuario: Usuario;
-	articulos: Articulo[];
-	total: number;
+    id: string;
+    trackingId: string;
+    fecha: Date;
+    estado: EstadoPedido;
+    cliente: Usuario;
+    total: number;
+    metodoPago: 'TRANSFERENCIA' | 'MERCADOPAGO';
+    comprobanteUrl?: string; 
 }
 
 interface Inventario {
